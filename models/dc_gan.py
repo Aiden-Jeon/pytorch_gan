@@ -4,16 +4,17 @@ import torch
 import torch.nn as nn
 
 from models import AbstractGAN
-
+from decorators import unrolling_generator
 
 class DCGAN(AbstractGAN):
-    def __init__(self, generator, generator_opt, discriminator, discriminator_opt):
+    def __init__(self, generator, generator_opt, discriminator, discriminator_opt, loss_fn, unrolling_step=0):
         super().__init__()
         self.generator = generator
         self.generator_opt = generator_opt
         self.discriminator = discriminator
         self.discriminator_opt = discriminator_opt
-        self.loss_fn = nn.BCELoss()
+        self.loss_fn = loss_fn
+        self.unrolling_step = unrolling_step
 
     def get_discriminator_loss(self, x: torch.Tensor) -> torch.Tensor:
         batch_size = x.size(0)
@@ -35,7 +36,8 @@ class DCGAN(AbstractGAN):
         fake_D_loss = self.loss_fn(fake_D_score, fake_target)
 
         return real_D_loss, fake_D_loss
-
+    
+    @unrolling_generator
     def get_generator_loss(self, x: torch.Tensor) -> torch.Tensor:
         batch_size = x.size(0)
         device = x.device
@@ -49,13 +51,13 @@ class DCGAN(AbstractGAN):
         G_loss = self.loss_fn(fake_D_score, real_target)
 
         return G_loss
-
+    
     def fit(self, batch: Optional[Union[tuple, list]]) -> dict:
         self.generator.train()
         self.discriminator.train()
         self.generator_opt.zero_grad()
         self.discriminator_opt.zero_grad()
-
+        
         device = next(self.generator.parameters()).device
         x, y = batch
         x = x.to(device)
@@ -72,7 +74,6 @@ class DCGAN(AbstractGAN):
         G_loss = self.get_generator_loss(x)
         G_loss.backward()
         self.generator_opt.step()
-
         return {
             "D_loss": float(D_loss),
             "G_loss": float(G_loss),
