@@ -37,7 +37,6 @@ class DCGAN(AbstractGAN):
 
         return real_D_loss, fake_D_loss
     
-    @unrolling_generator
     def get_generator_loss(self, x: torch.Tensor) -> torch.Tensor:
         batch_size = x.size(0)
         device = x.device
