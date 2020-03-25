@@ -1,1 +1,1 @@
-from .loss import bce_loss, mse_loss
+from .loss import bce_loss, least_squares_loss
