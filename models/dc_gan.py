@@ -4,17 +4,16 @@ import torch
 import torch.nn as nn
 
 from models import AbstractGAN
-from decorators import unrolling_generator
 
-class DCGAN(AbstractGAN):
-    def __init__(self, generator, generator_opt, discriminator, discriminator_opt, loss_fn, unrolling_step=0):
+
+class DeepConvolutionGAN(AbstractGAN):
+    def __init__(self, generator, generator_opt, discriminator, discriminator_opt, loss_fn):
         super().__init__()
         self.generator = generator
         self.generator_opt = generator_opt
         self.discriminator = discriminator
         self.discriminator_opt = discriminator_opt
         self.loss_fn = loss_fn
-        self.unrolling_step = unrolling_step
 
     def get_discriminator_loss(self, x: torch.Tensor) -> torch.Tensor:
         batch_size = x.size(0)
