@@ -19,6 +19,7 @@ class ActivatonLayer(nn.Module):
     def forward(self, x):
         return self.activation(x) if self.activation is not None else x
 
+
 class ConvLayer(nn.Module):
     def __init__(
         self,
