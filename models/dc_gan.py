@@ -55,4 +55,4 @@ class LeastSquaresGAN(DeepConvolutionGAN):
         super().__init__(generator, generator_opt, discriminator, discriminator_opt)
 
     def loss_fn(self, score, target):
-        return torch.nn.BCELoss()(score, target)
+        return F.mse_loss(score, target)
