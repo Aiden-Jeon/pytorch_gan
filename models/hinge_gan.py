@@ -9,7 +9,7 @@ class HingeGAN(BaseGAN):
         super().__init__(generator, generator_opt, discriminator, discriminator_opt)
 
     def loss_fn(self, score):
-        return torch.nn.functional.relu(score).mean()
+        return F.relu(score).mean()
         
     def discriminator_loss(self, x: torch.Tensor) -> (torch.Tensor, torch.Tensor):
         batch_size = x.size(0)
