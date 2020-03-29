@@ -1,17 +1,25 @@
-from typing import Callable, Union, Any, Optional
 import torch
-import torch.nn.functional as F
+
 from .base_gan import BaseGAN
+from loss import bce_loss_with_logit
+from modules import Generator
+from modules import Discriminator
 
 
 class DeepConvolutionGAN(BaseGAN):
-    def __init__(self, generator, generator_opt, discriminator, discriminator_opt):
-        super().__init__(generator, generator_opt, discriminator, discriminator_opt)
+    def __init__(
+        self,
+        generator_and_opt: [Generator, torch.optim] = None,
+        discriminator_and_opt: [Discriminator, torch.optim] = None,
+        input_size: int = None,
+        hidden_channel: int = 128,
+        latent_dim: int = 100,
+        learning_rate: float = 1e-4,
+        loss_fn: callable = bce_loss_with_logit
+    ):
+        super().__init__(generator_and_opt, discriminator_and_opt, input_size, hidden_channel, latent_dim, learning_rate)
+        self.loss_fn = loss_fn
 
-    def loss_fn(self, score, target):
-        prob = torch.sigmoid(score)
-        return F.binary_cross_entropy(prob, target)
-        
     def discriminator_loss(self, x: torch.Tensor) -> (torch.Tensor, torch.Tensor):
         batch_size = x.size(0)
         device = x.device
@@ -33,7 +41,7 @@ class DeepConvolutionGAN(BaseGAN):
         fake_D_loss = self.loss_fn(fake_D_score, fake_target)
 
         return real_D_loss, fake_D_loss
-    
+
     def generator_loss(self, x: torch.Tensor) -> torch.Tensor:
         batch_size = x.size(0)
         device = x.device
@@ -48,11 +56,3 @@ class DeepConvolutionGAN(BaseGAN):
         G_loss = self.loss_fn(fake_D_score, real_target)
 
         return G_loss
-
-
-class LeastSquaresGAN(DeepConvolutionGAN):
-    def __init__(self, generator, generator_opt, discriminator, discriminator_opt):
-        super().__init__(generator, generator_opt, discriminator, discriminator_opt)
-
-    def loss_fn(self, score, target):
-        return F.mse_loss(score, target)
